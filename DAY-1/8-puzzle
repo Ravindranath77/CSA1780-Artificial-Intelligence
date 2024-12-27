@@ -1,0 +1,65 @@
+import heapq
+
+def manhattan_distance(board, goal):
+    distance = 0
+    size = int(len(board) ** 0.5)
+    for i in range(len(board)):
+        if board[i] != 0:
+            goal_pos = goal.index(board[i])
+            current_row, current_col = divmod(i, size)
+            goal_row, goal_col = divmod(goal_pos, size)
+            distance += abs(current_row - goal_row) + abs(current_col - goal_col)
+    return distance
+
+def possible_moves(board):
+    size = int(len(board) ** 0.5)
+    zero_pos = board.index(0)
+    row, col = divmod(zero_pos, size)
+    moves = []
+    if row > 0:
+        moves.append(swap(board, zero_pos, zero_pos - size))
+    if row < size - 1:
+        moves.append(swap(board, zero_pos, zero_pos + size))
+    if col > 0:
+        moves.append(swap(board, zero_pos, zero_pos - 1))
+    if col < size - 1:
+        moves.append(swap(board, zero_pos, zero_pos + 1))
+    return moves
+
+def swap(board, i, j):
+    new_board = board[:]
+    new_board[i], new_board[j] = new_board[j], new_board[i]
+    return new_board
+
+def solve_puzzle(start, goal):
+    open_set = []
+    heapq.heappush(open_set, (manhattan_distance(start, goal), 0, start, []))
+    closed_set = set()
+    
+    while open_set:
+        _, moves, current, path = heapq.heappop(open_set)
+        if current == goal:
+            return path + [current]
+        
+        closed_set.add(tuple(current))
+        
+        for move in possible_moves(current):
+            if tuple(move) not in closed_set:
+                heapq.heappush(open_set, (moves + 1 + manhattan_distance(move, goal), moves + 1, move, path + [current]))
+    
+    return None
+
+# Example usage
+start_state = [1, 2, 3, 4, 0, 5, 6, 7, 8]
+goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+solution = solve_puzzle(start_state, goal_state)
+
+if solution:
+    print("Solution found in", len(solution) - 1, "moves:")
+    for state in solution:
+        print(state[:3])
+        print(state[3:6])
+        print(state[6:])
+        print()
+else:
+    print("No solution found.")
