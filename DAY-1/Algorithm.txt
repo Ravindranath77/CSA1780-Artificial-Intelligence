@@ -1,0 +1,77 @@
+import heapq
+
+class Node:
+    def __init__(self, position, parent=None):
+        self.position = position
+        self.parent = parent
+        self.g = 0  # Cost from start to current Node
+        self.h = 0  # Heuristic based on distance to goal
+        self.f = 0  # Total cost (f = g + h)
+
+    def __lt__(self, other):
+        return self.f < other.f
+
+def heuristic(node_position, goal_position):
+    return abs(node_position[0] - goal_position[0]) + abs(node_position[1] - goal_position[1])
+
+def astar(maze, start, end):
+    open_list = []
+    closed_list = set()
+    start_node = Node(start)
+    goal_node = Node(end)
+    heapq.heappush(open_list, start_node)
+
+    while open_list:
+        current_node = heapq.heappop(open_list)
+        closed_list.add(current_node.position)
+
+        if current_node.position == goal_node.position:
+            path = []
+            while current_node:
+                path.append(current_node.position)
+                current_node = current_node.parent
+            return path[::-1]
+
+        neighbors = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        for new_position in neighbors:
+            node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
+
+            if node_position[0] > (len(maze) - 1) or node_position[0] < 0 or node_position[1] > (len(maze[len(maze) - 1]) - 1) or node_position[1] < 0:
+                continue
+
+            if maze[node_position[0]][node_position[1]] != 0:
+                continue
+
+            neighbor_node = Node(node_position, current_node)
+
+            if neighbor_node.position in closed_list:
+                continue
+
+            neighbor_node.g = current_node.g + 1
+            neighbor_node.h = heuristic(neighbor_node.position, goal_node.position)
+            neighbor_node.f = neighbor_node.g + neighbor_node.h
+
+            if add_to_open(open_list, neighbor_node):
+                heapq.heappush(open_list, neighbor_node)
+
+    return None
+
+def add_to_open(open_list, neighbor):
+    for node in open_list:
+        if neighbor.position == node.position and neighbor.g > node.g:
+            return False
+    return True
+
+# Example usage
+maze = [
+    [0, 1, 0, 0, 0, 0],
+    [0, 1, 0, 1, 1, 0],
+    [0, 0, 0, 1, 0, 0],
+    [0, 1, 1, 1, 0, 1],
+    [0, 0, 0, 0, 0, 0]
+]
+start = (0, 0)
+end = (4, 5)
+
+path = astar(maze, start, end)
+print("Path:", path)
