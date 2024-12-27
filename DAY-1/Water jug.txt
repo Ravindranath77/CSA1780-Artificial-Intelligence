@@ -1,0 +1,52 @@
+from collections import deque
+
+def is_valid(state, max_jug1, max_jug2):
+    jug1, jug2 = state
+    return 0 <= jug1 <= max_jug1 and 0 <= jug2 <= max_jug2
+
+def get_successors(state, max_jug1, max_jug2):
+    jug1, jug2 = state
+    return [
+        (max_jug1, jug2),  # Fill jug1
+        (jug1, max_jug2),  # Fill jug2
+        (0, jug2),         # Empty jug1
+        (jug1, 0),         # Empty jug2
+        (jug1 - min(jug1, max_jug2 - jug2), jug2 + min(jug1, max_jug2 - jug2)),  # Pour jug1 to jug2
+        (jug1 + min(jug2, max_jug1 - jug1), jug2 - min(jug2, max_jug1 - jug1))   # Pour jug2 to jug1
+    ]
+
+def water_jug_solver(jug1_capacity, jug2_capacity, target):
+    start = (0, 0)
+    queue = deque([(start, [])])
+    visited = set()
+
+    while queue:
+        (jug1, jug2), path = queue.popleft()
+        
+        if (jug1, jug2) in visited:
+            continue
+        
+        visited.add((jug1, jug2))
+        path = path + [(jug1, jug2)]
+        
+        if jug1 == target or jug2 == target:
+            return path
+        
+        for next_state in get_successors((jug1, jug2), jug1_capacity, jug2_capacity):
+            if is_valid(next_state, jug1_capacity, jug2_capacity) and next_state not in visited:
+                queue.append((next_state, path))
+    
+    return None
+
+# Example usage
+jug1_capacity = 4
+jug2_capacity = 3
+target = 2
+solution = water_jug_solver(jug1_capacity, jug2_capacity, target)
+
+if solution:
+    print("Solution found:")
+    for state in solution:
+        print(f"Jug1: {state[0]}, Jug2: {state[1]}")
+else:
+    print("No solution found.")

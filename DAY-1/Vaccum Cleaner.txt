@@ -1,0 +1,78 @@
+from collections import deque
+
+# Define the initial state of the environment
+initial_state = {
+    'A': 'Dirty',
+    'B': 'Dirty',
+    'C': 'Clean',
+    'D': 'Clean',
+    'vacuum_position': 'A'
+}
+
+# Define the goal state
+goal_state = {
+    'A': 'Clean',
+    'B': 'Clean',
+    'C': 'Clean',
+    'D': 'Clean',
+    'vacuum_position': 'A'
+}
+
+# Define the possible actions
+actions = ['MoveLeft', 'MoveRight', 'MoveUp', 'MoveDown', 'Suck']
+
+# Define the state transition function
+def transition(state, action):
+    new_state = state.copy()
+    pos = state['vacuum_position']
+    
+    if action == 'Suck':
+        new_state[pos] = 'Clean'
+    
+    elif action == 'MoveLeft' and pos in ['B', 'D']:
+        new_state['vacuum_position'] = chr(ord(pos) - 1)
+    
+    elif action == 'MoveRight' and pos in ['A', 'C']:
+        new_state['vacuum_position'] = chr(ord(pos) + 1)
+    
+    elif action == 'MoveUp' and pos in ['C', 'D']:
+        new_state['vacuum_position'] = chr(ord(pos) - 2)
+    
+    elif action == 'MoveDown' and pos in ['A', 'B']:
+        new_state['vacuum_position'] = chr(ord(pos) + 2)
+    
+    return new_state
+
+# Define the goal test
+def is_goal(state):
+    return state == goal_state
+
+# Define the BFS algorithm
+def bfs(initial_state):
+    frontier = deque([initial_state])
+    explored = set()
+    
+    while frontier:
+        state = frontier.popleft()
+        if is_goal(state):
+            return state
+        
+        explored.add(tuple(state.items()))
+        
+        for action in actions:
+            child = transition(state, action)
+            if tuple(child.items()) not in explored and child not in frontier:
+                frontier.append(child)
+    
+    return None
+
+# Run the BFS algorithm
+result = bfs(initial_state)
+
+# Print the result
+if result:
+    print("Goal state reached:")
+    for key, value in result.items():
+        print(f"{key}: {value}")
+else:
+    print("Goal state not reachable")

@@ -1,0 +1,28 @@
+def dfs_iterative(graph, start):
+    visited = set()
+    stack = [start]
+    dfs_order = []
+
+    while stack:
+        vertex = stack.pop()
+        if vertex not in visited:
+            visited.add(vertex)
+            dfs_order.append(vertex)
+            # Add neighbors in reverse order to maintain the correct DFS order
+            stack.extend(reversed(graph[vertex]))
+
+    return dfs_order
+
+# Example usage
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': ['F'],
+    'F': []
+}
+
+start_node = 'A'
+result = dfs_iterative(graph, start_node)
+print("Iterative DFS Order:", result)
